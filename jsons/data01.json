@@ -1,0 +1,13 @@
+[
+  {
+    "nombre": "Giovanni",
+    "puesto": "Programador",
+    "isEmployee": false
+  },
+  {
+    "nombre": "Karina",
+    "puesto": "Programador",
+    "isEmployee": true,
+    "country": "Mexico"
+  }
+]
