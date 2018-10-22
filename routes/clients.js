@@ -6,6 +6,16 @@ var data01 = require('../jsons/data01.json');
 var data02 = require('../jsons/data02.json');
 var data03 = require('../jsons/data03.json');
 
+router.use(function(req, res, next) {
+    var host = req.get('origin');
+    res.setHeader('Access-Control-Allow-Origin', host||"*");
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.append('Access-Control-Expose-Headers');
+    next();
+});
+
 router.get("/", function(req, res){
 	res.sendFile(path.join(__dirname, '../views/error.html'));
 });
