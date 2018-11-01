@@ -1,19 +1,41 @@
+Users:
 {
-  "number": 10000001,
-  "name": "Giovanni Nicolás Marín",
-  "cardNumber": "4152313157165455",
-  "phoneNumber": "5520721455",
-  "address": "Ninguna",
-  "balance": 1998.81,
-  "pocket": 1.19
+	"client": 10000001,
+	"email": "lic.giovanni.nicolas@gmail.com",
+	"username": "gio123",
+	"password": "fc7db1cecbcf5c8db721c0fec488ffdec18f62fb",
+	"type": "U",
+	"creationDate": "2018-11-01 11:00:00"
 }
+
+Clients:
 {
-	"number": "10000001",
+	"client": 10000001,
+	"name": "Giovanni Nicolas Marin",
+	"phoneNumber": "5520721455",
+	"address": "Ninguna",
+	"creationDate": "2018-11-01 11:00:00",
+	"birthDate": "1990-01-01"
+}
+
+Accounts;
+
+{
+  "client": 10000001,
+  "number": 1136164080,
+  "cardNumber": "4152313165748975",
+  "creationDate": "2018-11-01 11:00:00"
+  "balance": 1000
+}
+
+Movements:
+{
+	"client": 10000001,
+	"account": 1136164080,
 	"detail": {
-		"amount": 1,
-		"description": "Deposito",
-		"operationDate": "2018-10-31",
-		"operationTime": "18:00:00",
+		"amount": 0,
+		"description": "Alta del cliente.",
+		"operationDate": "2018-11-01 11:00:00"
 		"type": "C"
 	}
 }
@@ -23,7 +45,7 @@ D = Deposit
 I = Information
 
 {
-	"number": "10000001",
-	"balance": 0,
-	
+	"number": 10000001,
+	"creationDate": "2018-11-01 11:00:00"
+	"balance": 0
 }

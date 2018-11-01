@@ -19,6 +19,8 @@ app.use(function(req, res, next) {
 var clients = require('./routes/clients');
 var movements = require('./routes/movements');
 var pockets = require('./routes/pockets');
+var users = require('./routes/users');
+var accounts = require('./routes/accounts');
 
 app.use(logger('dev'));
 // view engine setup
@@ -33,6 +35,8 @@ app.use(bodyParser.json());
 app.use("/clients", clients);
 app.use("/movements", movements);
 app.use("/pockets", pockets);
+app.use("/users", users);
+app.use("/accounts", accounts);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
