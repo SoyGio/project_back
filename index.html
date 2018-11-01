@@ -14,7 +14,8 @@
 <input type="button" name="obtener" value="Obtener Lista" onclick="getList();"><br>
 <div id="response"></div>
 <br>
-
+<br>
+<input type="button" name="Tsec" value="Obtener Tsec" onclick="getTsec();">
 </body>
 <script>
   function getData(){
@@ -49,6 +50,20 @@
       document.getElementById("response").innerHTML = txt;
     }
 
+  }
+
+  function getTsec(){
+    var url = "http://localhost:8081/Andrea/dashboard/V00/tsec";
+    var xhttp = new XMLHttpRequest();
+
+    xhttp.withCredentials = true;
+    xhttp.open("POST", url, false);
+    xhttp.send();
+    if (xhttp.status == 200) {
+      console.log(xhttp.getResponseHeader('Tsec'));  
+    }else{
+      console.log("NOK"); 
+    }
   }
 </script>
 </html>

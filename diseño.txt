@@ -1,0 +1,29 @@
+{
+  "number": 10000001,
+  "name": "Giovanni Nicolás Marín",
+  "cardNumber": "4152313157165455",
+  "phoneNumber": "5520721455",
+  "address": "Ninguna",
+  "balance": 1998.81,
+  "pocket": 1.19
+}
+{
+	"number": "10000001",
+	"detail": {
+		"amount": 1,
+		"description": "Deposito",
+		"operationDate": "2018-10-31",
+		"operationTime": "18:00:00",
+		"type": "C"
+	}
+}
+
+C = Change
+D = Deposit
+I = Information
+
+{
+	"number": "10000001",
+	"balance": 0,
+	
+}

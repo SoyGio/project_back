@@ -1,47 +1,120 @@
 var express = require('express');
 var router = express.Router();
+var requestjson = require('request-json');
+var moment = require('moment');
 var path = require('path');
 
-var data01 = require('../jsons/data01.json');
-var data02 = require('../jsons/data02.json');
-var data03 = require('../jsons/data03.json');
+var service = require('../scripts/execute.js');
 
+var pathUrlBd = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
+var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
+var request = requestjson.createClient(pathUrlBd);
 router.use(function(req, res, next) {
-    var host = req.get('origin');
-    res.setHeader('Access-Control-Allow-Origin', host||"*");
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.append('Access-Control-Expose-Headers');
-    next();
+ res.header("Access-Control-Allow-Origin", "*");
+ res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+ next();
 });
 
-router.get("/", function(req, res){
-	res.sendFile(path.join(__dirname, '../views/error.html'));
+var jsonError = {
+	message: ''
+};
+
+router.get('/', function(req, res, next) {
+  res.render('index', { title: '' });
 });
-// /clients/v00/clients
-router.get("/v00/clients", function(req, res){
-	res.json(data01);
+
+router.get("/v0/clients", function(req, res){
+	service.executeGET(pathUrlBd, apiKey, function(data) {
+	    return res.json(data);
+	});
 });
-//con id en la url
-router.get("/info/:id", function(req, res){
-	if (req.params.id === '123'){
-		res.json(data02);
-	}else{
-		res.json(data03);
-	}
-	
+
+router.get("/v0/clients/:id", function(req, res){
+	//validaId
+	var params = req.params.id + apiKey;
+	service.executeGET(pathUrlBd, params, function(data) {
+	    return res.json(data);
+	});
+
+	return false;
 });
-//con id como parametro
-router.get("/info", function(req, res){
-	if (req.query.id !== undefined){
-		if (req.query.id === '123'){
-			res.json(data02);
-		}else{
-			res.json(data03);
+
+router.delete("/v0/clients/:id", function(req, res){
+	//validaId
+	var params = req.params.id + apiKey;
+	service.executeDELETE(pathUrlBd, params, function(data) {
+	    if (data.number != undefined){
+	    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
+		    var data = {
+	  			number: data.number,
+	  			detail: {
+	  				amount: 0,
+	  				description: 'Se ha eliminado la cuenta.',
+	  				operationDate: moment().format('YYYY-MM-DD'),
+	  				operationTime: moment().format('HH:mm:ss'),
+	  				type: 'I'
+	  			}
+	  		};
+	  		service.executePOSTOut(pathUrlMov, apiKey, data, function(data2) {
+	  			//No hace nada, no es necesario devolver el error.
+	  		});
+		   
 		}
-	}
-	
-	
+		 res.json(data);
+	});
+	return false;
+});
+
+router.post("/v0/clients", function(req, res){
+	var clientNumber = Math.floor(Math.random() * 99999999);
+	req.body.number = clientNumber;
+	req.body.balance = 1000;
+
+	service.executePOST(pathUrlBd, apiKey, req.body, function(data) {
+	    var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
+	    var dataX = {
+  			number: clientNumber,
+  			detail: {
+  				amount: 0,
+  				description: 'Apertura de la cuenta.',
+  				operationDate: moment().format('YYYY-MM-DD'),
+  				operationTime: moment().format('HH:mm:ss'),
+  				type: 'I'
+  			}
+  		};
+  		service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
+  			//No hace nada, no es necesario devolver el error.
+  		});
+
+  		res.json(data);
+	});
+	return false;
+});
+
+router.put("/v0/clients/:id", function(req, res){
+	//validaId
+	var params = req.params.id + apiKey;
+	service.executeGET(pathUrlBd, params, function(data) {
+		req.body.number = data.number;
+	    req.body.balance = data.balance;
+	    service.executePUT(pathUrlBd, apiKey, req.body, function(data2) {
+		    var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
+		    var dataX = {
+	  			number: data.number,
+	  			detail: {
+	  				amount: 0,
+	  				description: 'Actualizacion en los datos de la cuenta.',
+	  				operationDate: moment().format('YYYY-MM-DD'),
+	  				operationTime: moment().format('HH:mm:ss'),
+	  				type: 'I'
+	  			}
+	  		};
+	  		service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data3) {
+	  			//No hace nada, no es necesario devolver el error.
+	  		});
+  		return res.json(data);
+		});
+	});
+  	return false;
 });
 module.exports = router;
