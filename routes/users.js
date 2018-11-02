@@ -37,7 +37,6 @@ router.get("/v0/users/", function(req, res){
     	username: req.query.username
   	};
   	var urlQuery ="&q=" + JSON.stringify(query);
-  	console.log(pathUrlBd+ apiKey + urlQuery);
   	service.executeGET(pathUrlBd, apiKey + urlQuery, function(data) {
   		if (data.length === 0){
   			jsonError.code = 'Error';
@@ -50,9 +49,8 @@ router.get("/v0/users/", function(req, res){
   			jsonError.message = "La contraseña que ingresaste es incorrecta.";
 			return res.status(400).json(jsonError);
   		}
-  		jsonError.code = 'OK';
-  		jsonError.message = 'Acceso correcto.';
-	    return res.json(jsonError);
+  		data[0].message = 'Acceso correcto.';
+	    return res.json(data);
 	});
 	return false;
 });

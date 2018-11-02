@@ -23,9 +23,20 @@ router.get('/', function(req, res, next) {
 });
 
 router.get("/v0/clients", function(req, res){
+
+	if (req.query.client !== undefined && req.query.client !== ''){
+		var query = {
+	    	number: Number(req.params.client)
+	  	};
+  		var params ="&q=" + JSON.stringify(query);
+  		apiKey +=params;
+	}
+
 	service.executeGET(pathUrlBd, apiKey, function(data) {
 	    return res.json(data);
 	});
+
+	
 });
 
 router.get("/v0/clients/:id", function(req, res){
