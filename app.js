@@ -6,8 +6,8 @@ var requestjson = require('request-json');
 var path = require('path');
 
 var app = express();
-app.get("/", function(req, res){
-	res.sendFile(path.join(__dirname, './views/index.html'));
+app.get('/', function(req, res, next) {
+  res.render('index', { title: 'Proyecto TechU - Back', port: 4000 });
 });
 
 app.use(function(req, res, next) {
@@ -54,6 +54,6 @@ app.use(function(err, req, res, next) {
 });
 var port = 4000;
 app.listen(port, function() {
-  console.log('Tu servidor ha sido levantando en el puerto: ' + 4000);
+  console.log('Aplicacion lista en: http://127.0.0.1:' + 4000);
 });
 module.exports = app;
