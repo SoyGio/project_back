@@ -8,11 +8,15 @@ var service = require('../scripts/execute.js');
 var pathUrlBd = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
 var request = requestjson.createClient(pathUrlBd);
-router.use(function(req, res, next) {
- res.header("Access-Control-Allow-Origin", "*");
- res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
- next();
-});
+
+	router.use(function(req, res, next) {
+		var host = req.get('origin');
+  		res.setHeader('Access-Control-Allow-Origin', host || '*');
+  		res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  		res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,tsec,otp');
+  		res.setHeader('Access-Control-Allow-Credentials', true);
+	 	next();
+	});
 
 var jsonError = {
 	message: ''
@@ -79,11 +83,10 @@ router.put("/v0/clients/:id", function(req, res){
 	service.executeGET(pathUrlBd, params, function(data) {
 		req.body.client = data.client;
 	    req.body.creationDate = data.creationDate;
-	    req.body.birthDate = data.birthDate;
 	    service.executePUT(pathUrlBd, apiKey, req.body, function(data2) {
 		    var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 		    var dataX = {
-	  			client: data.clients,
+	  			client: data.client,
 	  			number: 000,
 	  			detail: {
 	  				amount: 0,
