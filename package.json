@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www",
-    "backup": "node ./bin/www"
+    "start": "node ./bin/www",
+    "backup": "nodemon ./bin/www"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
