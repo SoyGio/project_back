@@ -47,6 +47,7 @@ service.executePOST = function (pathUrl, params, post, callback){
 
 service.executePOSTOut = function (pathUrl, params, post){
 	var request = requestjson.createClient(pathUrl);
+	request.headers['Content-Type'] = 'application/json';
 	request.post(params,post, function(err, req, body) {
 	    if (err){
 	    	console.log("Error: ", err);

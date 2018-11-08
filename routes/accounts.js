@@ -7,16 +7,21 @@ var service = require('../scripts/execute.js');
 
 var pathUrlBd = "https://api.mlab.com/api/1/databases/proyecto/collections/accounts/";
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
-var request = requestjson.createClient(pathUrlBd);
-router.use(function(req, res, next) {
- res.header("Access-Control-Allow-Origin", "*");
- res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
- next();
-});
+
+	router.use(function(req, res, next) {
+		var host = req.get('origin');
+  		res.setHeader('Access-Control-Allow-Origin', host || '*');
+  		res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  		res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,tsec,otp');
+  		res.setHeader('Access-Control-Allow-Credentials', true);
+	 	next();
+	});
 
 router.get('/', function(req, res, next) {
   res.render('index', { title: '' });
 });
+
+var jsonError = {};
 
 router.get("/v0/accounts", function(req, res){
 	service.executeGET(pathUrlBd, apiKey, function(data) {
@@ -26,9 +31,27 @@ router.get("/v0/accounts", function(req, res){
 
 router.get("/v0/accounts/:id", function(req, res){
 	//validaId
+	var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
+	if (req.query.type !== undefined && req.query.type === 'DETAIL'){
+		pathUrlCli = pathUrlBd;
+	}
 	var params = req.params.id + apiKey;
-	service.executeGET(pathUrlBd, params, function(data) {
-	    return res.json(data);
+
+  	service.executeGET(pathUrlCli, params, function(data) {
+		if (data.client === undefined){
+  			jsonError.message = "El cliente no existe.";
+		    return res.status(400).json(jsonError);
+  		}
+  		var query = {};
+  		if (req.query.type !== undefined && req.query.type === 'DETAIL'){
+  			query.number = Number(data.number);
+		}else {
+			query.client = Number(data.client);
+		}
+	  	var params2 ="&q=" + JSON.stringify(query);
+		service.executeGET(pathUrlBd, apiKey + params2, function(data2) {
+		    return res.json(data2);
+		});
 	});
 
 	return false;
@@ -42,7 +65,7 @@ router.delete("/v0/accounts/:id", function(req, res){
 	    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 		    var data = {
 	  			client: data.client,
-	  			number: 000,
+	  			number: data.number,
 	  			detail: {
 	  				amount: 0,
 	  				description: 'Se ha eliminado la cuenta',
@@ -60,24 +83,21 @@ router.delete("/v0/accounts/:id", function(req, res){
 	return false;
 });
 
-router.post("/v0/accounts/:client", function(req, res){
-	var query = {
-    	number: Number(req.params.client)
-  	};
-  	var urlQuery ="&q=" + JSON.stringify(query);
+router.post("/v0/accounts/:id", function(req, res){
+  	var params = req.params.id + apiKey;
   	var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
-  	service.executeGET(pathUrlCli, apiKey + urlQuery, function(data) {
-		if (data.length === 0){
+  	service.executeGET(pathUrlCli, params, function(data) {
+		if (data.client === undefined){
   			jsonError.message = "El cliente seleccionado no existe.";
 		    return res.status(400).json(jsonError);
   		}
-  		req.body.client = data[0].client;
+  		req.body.client = data.client;
   		req.body.creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
   		req.body.balance = 1000;
   		service.executePOST(pathUrlBd, apiKey, req.body, function(data2) {
   			var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 		    var dataX = {
-	  			client: data[0].client,
+	  			client: data.client,
 	  			number: 000,
 	  			detail: {
 	  				amount: 0,
@@ -100,14 +120,14 @@ router.put("/v0/accounts/:id", function(req, res){
 	//validaId
 	var params = req.params.id + apiKey;
 	service.executeGET(pathUrlBd, params, function(data) {
-		req.body.client = data.client;
+		req.body.client = Number(data.client);
 		req.body.creationDate = data.creationDate;
 	    req.body.balance = data.balance;
 	    service.executePUT(pathUrlBd, apiKey, req.body, function(data2) {
 		    var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 		    var dataX = {
 	  			client: data.client,
-	  			number: 000,
+	  			number: data.number,
 	  			detail: {
 	  				amount: 0,
 	  				description: 'Se actualizaron los datos de la cuenta',

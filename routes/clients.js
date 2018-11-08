@@ -7,7 +7,6 @@ var service = require('../scripts/execute.js');
 
 var pathUrlBd = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
-var request = requestjson.createClient(pathUrlBd);
 
 	router.use(function(req, res, next) {
 		var host = req.get('origin');
