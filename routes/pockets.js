@@ -8,14 +8,14 @@ var path = require('path');
 var pathUrlBd = "https://api.mlab.com/api/1/databases/proyecto/collections/pockets/";
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
 
-	router.use(function(req, res, next) {
-		var host = req.get('origin');
-  		res.setHeader('Access-Control-Allow-Origin', host || '*');
-  		res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  		res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,tsec,otp');
-  		res.setHeader('Access-Control-Allow-Credentials', true);
-	 	next();
-	});
+router.use(function(req, res, next) {
+  var host = req.get('origin');
+  res.setHeader('Access-Control-Allow-Origin', host || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,tsec,otp');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
 
 var jsonError = {
 	message: ''
@@ -194,10 +194,6 @@ router.delete("/v0/pockets/:number", function(req, res){
 			});
 	  	});
 	 });
-
-	
-
-	  	
 	return false;
 });
 

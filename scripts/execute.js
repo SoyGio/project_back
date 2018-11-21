@@ -83,4 +83,38 @@ service.executeDELETE = function (pathUrl, params, callback){
   	return false;
 }
 
+service.getJsonMovements = function (client, number, amount, description, operationDate, type){
+	var data = {
+		client: client,
+		number: number,
+		detail: {
+			amount: amount,
+			description: description,
+			operationDate: operationDate,
+			type: type
+		}
+	};
+
+	return data;
+}
+
+service.getNavigator = function (userAgent){
+	if (userAgent.indexOf("Firefox") > -1) {
+	     return "Mozilla Firefox";
+	} else if (userAgent.indexOf("Opera") > -1) {
+	     return "Opera";
+	} else if (userAgent.indexOf("Trident") > -1) {
+	     return "Microsoft Internet Explorer";
+	} else if (userAgent.indexOf("Edge") > -1) {
+	     return "Microsoft Edge";
+	} else if (userAgent.indexOf("Chrome") > -1) {
+	    return "Google Chrome o Chromium";
+	} else if (userAgent.indexOf("Safari") > -1) {
+	    return "Apple Safari";
+	} 
+	
+	return "Desconocido";
+}
+
+
 module.exports = service;
