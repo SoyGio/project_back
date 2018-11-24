@@ -66,21 +66,23 @@ router.delete("/v0/accounts/:id", function(req, res){
       var urlQuery ="&q=" + JSON.stringify(query);
       var pathUrlPoc = "https://api.mlab.com/api/1/databases/proyecto/collections/pockets/";
       service.executeGET(pathUrlPoc, apiKey + urlQuery, function(dataPoc) {
-        var params = dataPoc[0]._id.$oid + apiKey;
-        //Se eliminan los pockets asociadas a la cuenta.
-        service.executeDELETE(pathUrlPoc, params, function(data2) {
-          var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-          var obj = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado la cuenta',
-          moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
-          //Se guarda el movimiento.
-          service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
-	        //No hace nada, no es necesario devolver algo.
+        if (dataPoc.length > 0){
+          var params = dataPoc[0]._id.$oid + apiKey;
+          //Se eliminan los pockets asociadas a la cuenta.
+          service.executeDELETE(pathUrlPoc, params, function(data2) {
+            var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
+            var obj = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado la cuenta',
+            moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
+            //Se guarda el movimiento.
+            service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
+            //No hace nada, no es necesario devolver algo.
+            });
+            obj.detail.description = 'Se han eliminado los apartados asociados a la cuenta';
+              service.executePOSTOut(pathUrlMov, apiKey, obj, function(data4) {
+            //No hace nada, no es necesario devolver algo.
+            });
           });
-          obj.detail.description = 'Se han eliminado los apartados asociados a la cuenta';
-            service.executePOSTOut(pathUrlMov, apiKey, obj, function(data4) {
-	        //No hace nada, no es necesario devolver algo.
-          });
-        });
+        }   
       });
     }
     res.json(data);

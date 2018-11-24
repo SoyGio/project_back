@@ -23,6 +23,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get("/v0/validate/", function(req, res){
+
   var username = escape(req.query.username);
   var query = {};
   if (req.query.username.includes("@")){
@@ -31,14 +32,15 @@ router.get("/v0/validate/", function(req, res){
 	query.username = username
   }
   var urlQuery ="&q=" + JSON.stringify(query);
+  console.log(pathUrlUsers+ apiKey + urlQuery);
   service.executeGET(pathUrlUsers, apiKey + urlQuery, function(data) {
   	var json  = {};
   	if (data.length > 0){
   	  json.code = 'ERR';
-  	  son.message = 'El usuario y/o email que ingresaste ya existe.'
-  	  return res.status(400).json(json );
+  	  json.message = 'El usuario y/o email que ingresaste ya existe.'
+  	  return res.status(400).json(json);
   	}else{
-	  return res.json(json );
+	  return res.json(json);
   	}
   });
 });
@@ -82,12 +84,12 @@ router.get("/v0/users/", function(req, res){
 	  service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
 	    //No hace nada, no es necesario devolver algo.
 	  });
-  	  json .code = 'OK';
-      json .message = 'Has iniciado sesión correctamente.';
-	  json .clientId = data2[0]._id.$oid;
-	  json .clientName = data2[0].name;
+  	  json.code = 'OK';
+      json.message = 'Has iniciado sesión correctamente.';
+	  json.clientId = data2[0]._id.$oid;
+	  json.clientName = data2[0].name;
 	
-	  return res.json(json );
+	  return res.json(json);
     });
   });
   return false;
