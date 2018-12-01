@@ -24,32 +24,33 @@ router.get('/', function(req, res, next) {
 });
 
 router.get("/v0/movements", function(req, res){
-	service.executeGET(pathUrlBd, apiKey, function(data) {
-	    return res.json(data);
-	});
-	return false;
+  service.executeGET(pathUrlBd, apiKey, function(data) {
+    return res.json(data);
+  });
+  return false;
 });
 
 router.get("/v0/movements/:client", function(req, res){
-	
+  var params = req.params.client + apiKey;
+  var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
+    service.executeGET(pathUrlCli, params, function(data) {
+      if (data.client === undefined){
+        jsonError.message = "El cliente seleccionado no existe.";
+        return res.status(400).json(jsonError);
+      }
+      var query = {
+        client: Number(data.client)
+      };
+      var sort = {
+        "detail.operationDate": 1
+      }
+      var urlQuery ="&q=" + JSON.stringify(query) + "&s=" + JSON.stringify(sort);
+      service.executeGET(pathUrlBd, apiKey + urlQuery, function(data) {
+        return res.json(data);
+      });
+    });
 
-	var params = req.params.client + apiKey;
-  	var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
-  	service.executeGET(pathUrlCli, params, function(data) {
-		if (data.client === undefined){
-  			jsonError.message = "El cliente seleccionado no existe.";
-		    return res.status(400).json(jsonError);
-  		}
-  		var query = {
-	    	client: Number(data.client)
-	  	};
-	  	var urlQuery ="&q=" + JSON.stringify(query);
-	  	service.executeGET(pathUrlBd, apiKey + urlQuery, function(data) {
-		    return res.json(data);
-		});
-	});
-
-	return false;
+    return false;
 });
 
 
