@@ -101,29 +101,19 @@ router.post("/v0/pockets/:number", function(req, res){
 	    		}
 	    		service.executePOST(pathUrlBd, apiKey, dataX, function(data3) {
 				    var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-				    var dataY = {
-			  			client: data[0].client,
-			  			number: data[0].number,
-			  			detail: {
-			  				amount: balanceAdd,
-			  				description: 'Se crea apartado de la cuenta.',
-	  						operationDate: creationDate,
-			  				type: 'I'
-			  			}
-			  		};
-			  		
+				    var dataY = service.getJsonMovements(data[0].client, data[0].number, balanceAdd, 'Se crea apartado de la cuenta',
+	  					creationDate, 'C');
 		  			service.executePOST(pathUrlMov, apiKey, dataY, function(data4) {
 		  				//No hace nada, no es necesario devolver el error.
 			  		});
 			  		if (balanceAdd > 0){
-				  		dataY.detail.description = "Se realiza abono al apartado.";
+				  		dataY.detail.description = "Se realiza abono al apartado";
 						dataY.detail.amount = balanceAdd;
 						dataY.detail.type = "D";
 						service.executePOST(pathUrlMov, apiKey, dataY, function(data5) {
 				  			//No hace nada, no es necesario devolver el error.
 				  		});
 		  			}
-			  		
 			  		return res.json(data);
 				});
 			}else{
@@ -161,29 +151,13 @@ router.delete("/v0/pockets/:number", function(req, res){
 				  	//Consulta los clientes para validar saldo y la cuenta
 				    if (data.number != undefined){
 				    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-					    var dataX = {
-				  			client: data.client,
-				  			number: data.number,
-				  			detail: {
-				  				amount: 0,
-				  				description: 'Se ha eliminado el apartado de la cuenta',
-				  				operationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
-				  				type: 'I'
-				  			}
-				  		};
+				    	var dataX = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado el apartado de la cuenta',
+	  						moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
 				  		service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
 				  			//No hace nada, no es necesario devolver el error.
 				  		});
-				  		var dataY = {
-				  			client: data.client,
-				  			number: data.number,
-				  			detail: {
-				  				amount: dataPoc[0].balance,
-				  				description: 'Se ha devuelto el monto del apartado a la cuenta',
-				  				operationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
-				  				type: 'D'
-				  			}
-				  		};
+				  		var dataY = service.getJsonMovements(data.client, data.number, dataPoc[0].balance, 'Se ha devuelto el monto del apartado a la cuenta',
+	  						moment().format('YYYY-MM-DD HH:mm:ss'), 'D');
 				  		service.executePOSTOut(pathUrlMov, apiKey, dataY, function(data3) {
 				  			//No hace nada, no es necesario devolver el error.
 				  		});
@@ -197,31 +171,48 @@ router.delete("/v0/pockets/:number", function(req, res){
 	return false;
 });
 
-
-
 router.put("/v0/pockets/:id", function(req, res){
 	//validarId
-	var type = req.body.type; //ADD, DP
+	var type = req.body.type; //ADD, DISP
 	var params = req.params.id + apiKey;
-  	service.executeGET(pathUrlBd, params, function(data) {
+  	service.executeGET(pathUrlBd, params, function(data) {	
   		if (data.number === undefined){
   			jsonError.message = "El apartado seleccionado no existe.";
 			return res.status(400).json(jsonError);
   		}
-  		req.body.client = data.client;
-	    var newBalancePocket = 0;
-	    var newBalanceAccount = 0;
-	    if (type === 'ADD'){
-	    	newBalancePocket = data.balance + req.body.balance;
-	    	newBalanceAccount = data.balance - req.body.balance;
-	    }else if (type === 'DP'){
-	    	newBalancePocket = data.balance - req.body.balance;
-	    	newBalanceAccount = data.balance + req.body.balance;
-	    }
-	    req.body.pocket = data.pocket;
-	    req.body.balance = newBalancePocket;
-	    return res.json(data);
+  		var pathUrlAcc = "https://api.mlab.com/api/1/databases/proyecto/collections/accounts/";
+  		var query = {
+  			number: Number(data.number)
+  		};
+  		var params2 ="&q=" + JSON.stringify(query);
+  		console.log(pathUrlAcc + apiKey + params2);
+	  	service.executeGET(pathUrlAcc, apiKey + params2, function(data2) {
+	  		if (type === 'ADD' && Number(req.body.amount) > Number(data2[0].balance)){
+	    		jsonError.message = "El saldo del apartado no puede ser mayor al saldo disponible en tu cuenta.";
+				return res.status(400).json(jsonError);
+	    	}else if (type === 'DISP' && Number(req.body.amount) > Number(data.balance)){
+	    		jsonError.message = "El saldo a disponer no puede ser mayor al saldo disponible en tu apartado.";
+				return res.status(400).json(jsonError);
+	    	}
+
+		    var newBalancePocket = 0;
+		    var newBalanceAccount = 0;
+		    if (type === 'ADD'){
+		    	newBalancePocket = Number(data.balance) + Number(req.body.balance);
+		    	newBalanceAccount = Number(data.balance) - Number(req.body.balance);
+		    }else if (type === 'DISP'){
+		    	newBalancePocket = Number(data.balance) - Number(req.body.balance);
+		    	newBalanceAccount = Number(data.balance) + Number(req.body.balance);
+		    }
+		    req.body.pocket = data.pocket;
+		    req.body.balance = newBalancePocket;
+		    
+		    return res.json(data);
+	    });
+  		
+  		
 	});
+	
 
 });
 
