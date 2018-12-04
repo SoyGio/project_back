@@ -5,7 +5,7 @@ var moment = require('moment');
 var service = require('../scripts/execute.js');
 var path = require('path');
 
-var pathUrlBd = "https://api.mlab.com/api/1/databases/proyecto/collections/pockets/";
+var pathUrlPoc = "https://api.mlab.com/api/1/databases/proyecto/collections/pockets/";
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
 
 router.use(function(req, res, next) {
@@ -27,7 +27,7 @@ router.get('/', function(req, res, next) {
 
 router.get("/v0/pockets/", function(req, res){
 	//validaNumber
-  	service.executeGET(pathUrlBd, apiKey, function(data) {
+  	service.executeGET(pathUrlPoc, apiKey, function(data) {
   		if (data.length === 0){
   			jsonError.message = "No existen aparados a listar.";
 			return res.status(400).json(jsonError);
@@ -43,7 +43,7 @@ router.get("/v0/pockets/:number", function(req, res){
     	number: Number(req.params.number)
   	};
   	var urlQuery ="&q=" + JSON.stringify(query);
-  	service.executeGET(pathUrlBd, apiKey + urlQuery, function(data) {
+  	service.executeGET(pathUrlPoc, apiKey + urlQuery, function(data) {
   		if (data.length === 0){
   			jsonError.message = "La cuenta seleccionada no tiene apartados registrados.";
 			return res.status(400).json(jsonError);
@@ -77,7 +77,7 @@ router.post("/v0/pockets/:number", function(req, res){
     	var clientId = data[0]._id.$oid;
     	var creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
     	//Consulta pockets para validar si existe el pocket
-		service.executeGET(pathUrlBd, apiKey + urlQuery, function(data2) {
+		service.executeGET(pathUrlPoc, apiKey + urlQuery, function(data2) {
 			if (data2.length === 0){
 		    	var dataX = {
 		    		number: data[0].number,
@@ -99,10 +99,10 @@ router.post("/v0/pockets/:number", function(req, res){
 	    				
 	    			});
 	    		}
-	    		service.executePOST(pathUrlBd, apiKey, dataX, function(data3) {
+	    		service.executePOST(pathUrlPoc, apiKey, dataX, function(data3) {
 				    var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 				    var dataY = service.getJsonMovements(data[0].client, data[0].number, balanceAdd, 'Se crea apartado de la cuenta',
-	  					creationDate, 'C');
+	  					creationDate, 'A');
 		  			service.executePOST(pathUrlMov, apiKey, dataY, function(data4) {
 		  				//No hace nada, no es necesario devolver el error.
 			  		});
@@ -147,7 +147,7 @@ router.delete("/v0/pockets/:number", function(req, res){
 			};
 			service.executePUT(pathUrlAcc, apiKey + urlQuery, objPut, function(dataPut) {
 				var params = dataPoc[0]._id.$oid + apiKey;
-				service.executeDELETE(pathUrlBd, params, function(data) {
+				service.executeDELETE(pathUrlPoc, params, function(data) {
 				  	//Consulta los clientes para validar saldo y la cuenta
 				    if (data.number != undefined){
 				    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
@@ -175,7 +175,7 @@ router.put("/v0/pockets/:id", function(req, res){
 	//validarId
 	var type = req.body.type; //ADD, DISP
 	var params = req.params.id + apiKey;
-  	service.executeGET(pathUrlBd, params, function(data) {	
+  	service.executeGET(pathUrlPoc, params, function(data) {	
   		if (data.number === undefined){
   			jsonError.message = "El apartado seleccionado no existe.";
 			return res.status(400).json(jsonError);
@@ -187,6 +187,8 @@ router.put("/v0/pockets/:id", function(req, res){
   		var params2 ="&q=" + JSON.stringify(query);
   		console.log(pathUrlAcc + apiKey + params2);
 	  	service.executeGET(pathUrlAcc, apiKey + params2, function(data2) {
+	  		var accountId = data2[0]._id.$oid;
+	  		console.log(accountId);
 	  		if (type === 'ADD' && Number(req.body.amount) > Number(data2[0].balance)){
 	    		jsonError.message = "El saldo del apartado no puede ser mayor al saldo disponible en tu cuenta.";
 				return res.status(400).json(jsonError);
@@ -194,65 +196,42 @@ router.put("/v0/pockets/:id", function(req, res){
 	    		jsonError.message = "El saldo a disponer no puede ser mayor al saldo disponible en tu apartado.";
 				return res.status(400).json(jsonError);
 	    	}
-
 		    var newBalancePocket = 0;
 		    var newBalanceAccount = 0;
+		    var putType = '';
 		    if (type === 'ADD'){
-		    	newBalancePocket = Number(data.balance) + Number(req.body.balance);
-		    	newBalanceAccount = Number(data.balance) - Number(req.body.balance);
+		    	newBalanceAccount = Number(data2[0].balance) - Number(req.body.amount);
+		    	newBalancePocket = Number(data.balance) + Number(req.body.amount);
+		    	putType = 'D';
 		    }else if (type === 'DISP'){
-		    	newBalancePocket = Number(data.balance) - Number(req.body.balance);
-		    	newBalanceAccount = Number(data.balance) + Number(req.body.balance);
+		    	newBalanceAccount = Number(data2[0].balance) + Number(req.body.amount);
+		    	newBalancePocket = Number(data.balance) - Number(req.body.amount);
+		    	putType = 'C';
 		    }
-		    req.body.pocket = data.pocket;
-		    req.body.balance = newBalancePocket;
+		    data.balance = newBalancePocket;
+		    dataAcc = data2[0];
+		    dataAcc.balance = newBalanceAccount;
+		    delete data._id;
+		    delete dataAcc._id;
 		    
-		    return res.json(data);
-	    });
-  		
-  		
-	});
-	
+		    service.executePUT(pathUrlAcc, accountId + apiKey, dataAcc, function(dataPut) {
 
-});
-
-router.put("/v0/pocketsa/:id", function(req, res){
-	//validarId
-	var type = req.body.type; //ADD, DP, RM
-	var url = req.params.id + apiKey;
-	request.get(url, function(err, requ, body) {
-	    if (err){
-	      	return res.status(400).json(body);
-	    }else{
-	    	req.body.client = body.client;
-	    	req.body.balance = body.balance;
-	    	req.body.pocket = body.pocket;
-	    	request.headers['Content-Type'] = 'application/json';
-			request.put(apiKey, req.body, function(err2, requ2, body2) {
-				if (err){
-			    	return res.status(400).json(body);
-			  	}else{
-			  		var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-			  		var request2 = requestjson.createClient(pathUrlMov);
-			  		var data = {
-			  			client: body.client,
-			  			number: body.number,
-			  			detail: {
-			  				amount: 0,
-			  				description: 'Actualizacion en los datos de la cuenta.',
-			  				operationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
-			  				type: 'I'
-			  			}
-			  		};
-					request2.headers['Content-Type'] = 'application/json';
-					request2.post(apiKey, data, function(err3, requ3, body3) {
-						//No se hace nada, si se da del alta o no.
-					});
-			  		return res.json(body2);
-			  	}
 			});
-	    }
-  	});
-  	return false;
+			service.executePUT(pathUrlPoc, params, data, function(dataPut2) {
+				var desc = "agregado dinero al";
+				if (putType === 'C'){
+					var desc = "retirado dinero del";
+				}
+				var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
+				var dataX = service.getJsonMovements(data.client, data.number, Number(req.body.amount), 'Se ha ' + 
+					desc + ' apartado de la cuenta', moment().format('YYYY-MM-DD HH:mm:ss'), putType);
+				service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
+		  			//No hace nada, no es necesario devolver el error.
+		  		});
+			});
+		    return res.json(req.body);
+	    });
+	});
 });
+
 module.exports = router;
