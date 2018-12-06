@@ -8,6 +8,7 @@ var pathUrlAccount = "https://api.mlab.com/api/1/databases/proyecto/collections/
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
 
 router.use(function(req, res, next) {
+  moment().locale('es');
   var host = req.get('origin');
   res.setHeader('Access-Control-Allow-Origin', host || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -22,11 +23,13 @@ router.get('/', function(req, res, next) {
 
 var jsonError = {};
 
+/*
 router.get("/v0/accounts", function(req, res){
   service.executeGET(pathUrlAccount, apiKey, function(data) {
     return res.json(data);
   });
 });
+*/
 
 router.get("/v0/accounts/:id", function(req, res){
   //validaId
@@ -78,7 +81,7 @@ router.delete("/v0/accounts/:id", function(req, res){
     if (data.client != undefined){
       var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
       var obj = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado la cuenta',
-      moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'I');
+      moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
       //Se guarda el movimiento.
       service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
       //No hace nada, no es necesario devolver algo.
@@ -115,7 +118,7 @@ router.post("/v0/accounts/:id", function(req, res){
       return res.status(400).json(jsonError);
     }
     req.body.client = data.client;
-    req.body.creationDate = moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss');
+    req.body.creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
     req.body.balance = 1000;
     req.body.shortname = '';
     service.executePOST(pathUrlAccount, apiKey, req.body, function(data2) {
@@ -142,7 +145,7 @@ router.put("/v0/accounts/:id", function(req, res){
     service.executePUT(pathUrlAccount, apiKey, req.body, function(data2) {
       var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
       var obj = service.getJsonMovements(data.client, data.number, 0, 'Se actualizaron los datos de la cuenta',
-      moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'I');
+      moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
       service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
         //No hace nada, no es necesario devolver el error.
       });

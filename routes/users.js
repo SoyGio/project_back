@@ -10,6 +10,7 @@ var pathUrlUsers = "https://api.mlab.com/api/1/databases/proyecto/collections/us
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
 
 router.use(function(req, res, next) {
+  moment().locale('es');
   var host = req.get('origin');
   res.setHeader('Access-Control-Allow-Origin', host || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -83,7 +84,7 @@ router.get("/v0/users/", function(req, res){
           var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
           var navegador = service.getNavigator(req.headers['user-agent']);
           var obj = service.getJsonMovements(data[0].client, 0, 0, 'Sesión iniciada en ' + navegador,
-          moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'A');
+          moment().format('YYYY-MM-DD HH:mm:ss'), 'A');
           //Se guarda el movimiento.
           service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
             //No hace nada, no es necesario devolver algo.

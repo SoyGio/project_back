@@ -9,6 +9,7 @@ var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clie
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
 
 router.use(function(req, res, next) {
+  moment().locale('es');
   var host = req.get('origin');
   res.setHeader('Access-Control-Allow-Origin', host || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -37,8 +38,8 @@ router.get("/v0/clients", function(req, res){
 router.get("/v0/clients/:id", function(req, res){
    //validaId
   var params = req.params.id + apiKey;
-  var hour = moment().locale('es-mx').format('H');
-  var currentDate = moment().locale('es-mx').format('YYYY-MM-DD');
+  var hour = moment().format('H');
+  var currentDate = moment().format('YYYY-MM-DD');
   service.executeGET(pathUrlCli, params, function(data) {
   	data.currentDate = currentDate;
   	if (req.query.type === 'welcome'){
@@ -67,7 +68,7 @@ router.get("/v0/clients/:id", function(req, res){
 router.post("/v0/clients", function(req, res){
   var json  = {};
   var clientNumber = Math.round(new Date().getTime());
-  var creationDate = moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss');
+  var creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
   var obj = {
   	name: req.body.name,
   	phoneNumber: req.body.phoneNumber,
@@ -122,7 +123,7 @@ router.put("/v0/clients/:id", function(req, res){
 	  			detail: {
 	  				amount: 0,
 	  				description: 'Se han actualizado los datos del cliente',
-	  				operationDate: moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'),
+	  				operationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
 	  				type: 'I'
 	  			}
 	  		};
@@ -141,7 +142,7 @@ router.delete("/v0/clients/:id", function(req, res){
 	service.executeDELETE(pathUrlCli, params, function(data) {
 	    if (data.number != undefined){
 	    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-	    	var fecha = moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss');
+	    	var fecha = moment().format('YYYY-MM-DD HH:mm:ss');
 		    var data = {
 	  			client: data.client,
 	  			number: 0,

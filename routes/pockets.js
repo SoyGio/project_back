@@ -9,6 +9,7 @@ var pathUrlPoc = "https://api.mlab.com/api/1/databases/proyecto/collections/pock
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
 
 router.use(function(req, res, next) {
+  moment().locale('es');
   var host = req.get('origin');
   res.setHeader('Access-Control-Allow-Origin', host || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -25,6 +26,7 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: '' });
 });
 
+/*
 router.get("/v0/pockets/", function(req, res){
 	//validaNumber
   	service.executeGET(pathUrlPoc, apiKey, function(data) {
@@ -36,7 +38,7 @@ router.get("/v0/pockets/", function(req, res){
 	});
 	return false;
 });
-
+*/
 router.get("/v0/pockets/:number", function(req, res){
 	//validaNumber
 	var query = {
@@ -75,7 +77,7 @@ router.post("/v0/pockets/:number", function(req, res){
 			return res.status(400).json(jsonError);
     	}
     	var clientId = data[0]._id.$oid;
-    	var creationDate = moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss');
+    	var creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
     	//Consulta pockets para validar si existe el pocket
 		service.executeGET(pathUrlPoc, apiKey + urlQuery, function(data2) {
 			if (data2.length === 0){
@@ -152,12 +154,12 @@ router.delete("/v0/pockets/:number", function(req, res){
 				    if (data.number != undefined){
 				    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 				    	var dataX = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado el apartado de la cuenta',
-	  						moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'I');
+	  						moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
 				  		service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
 				  			//No hace nada, no es necesario devolver el error.
 				  		});
 				  		var dataY = service.getJsonMovements(data.client, data.number, dataPoc[0].balance, 'Se ha devuelto el monto del apartado a la cuenta',
-	  						moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'D');
+	  						moment().format('YYYY-MM-DD HH:mm:ss'), 'D');
 				  		service.executePOSTOut(pathUrlMov, apiKey, dataY, function(data3) {
 				  			//No hace nada, no es necesario devolver el error.
 				  		});
@@ -222,7 +224,7 @@ router.put("/v0/pockets/:id", function(req, res){
 				}
 				var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 				var dataX = service.getJsonMovements(data.client, data.number, Number(req.body.amount), 'Se ha ' + 
-					desc + ' apartado de la cuenta', moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), putType);
+					desc + ' apartado de la cuenta', moment().format('YYYY-MM-DD HH:mm:ss'), putType);
 				service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
 		  			//No hace nada, no es necesario devolver el error.
 		  		});

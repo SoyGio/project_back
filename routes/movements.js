@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var requestjson = require('request-json');
 var service = require('../scripts/execute.js');
 var path = require('path');
 var pathUrlBd = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
@@ -23,13 +22,14 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: '' });
 });
 
+/*
 router.get("/v0/movements", function(req, res){
   service.executeGET(pathUrlBd, apiKey, function(data) {
     return res.json(data);
   });
   return false;
 });
-
+*/
 router.get("/v0/movements/:client", function(req, res){
   var params = req.params.client + apiKey;
   var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
