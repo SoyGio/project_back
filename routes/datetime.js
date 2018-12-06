@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
-var moment = require('moment');
+var moment = require('moment-timezone');
 
 
 	router.use(function(req, res, next) {
@@ -22,7 +22,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get("/v0/date", function(req, res){
-  var date = moment().locale('es');
+  var date = moment().tz('America/Mexico_City');
   var obj = {
     date: date.format('YYYY-MM-DD'),
     time: date.format('HH:mm:ss')
