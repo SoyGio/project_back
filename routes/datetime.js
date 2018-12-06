@@ -5,7 +5,6 @@ var moment = require('moment');
 
 
 	router.use(function(req, res, next) {
-    moment().locale('es');
 		var host = req.get('origin');
   	res.setHeader('Access-Control-Allow-Origin', host || '*');
   	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -23,9 +22,10 @@ router.get('/', function(req, res, next) {
 });
 
 router.get("/v0/date", function(req, res){
+  var date = moment().locale('es');
   var obj = {
-    date: moment().format('YYYY-MM-DD'),
-    time: moment().format('HH:mm:ss')
+    date: date.format('YYYY-MM-DD'),
+    time: date.format('HH:mm:ss')
   };
   
   return res.json(obj);
