@@ -30,29 +30,45 @@ router.get("/v0/accounts", function(req, res){
 
 router.get("/v0/accounts/:id", function(req, res){
   //validaId
-  var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
-  if (req.query.type !== undefined && req.query.type === 'DETAIL'){
-    pathUrlCli = pathUrlAccount;
-  }
-  var params = req.params.id + apiKey;
-  service.executeGET(pathUrlCli, params, function(data) {
-    if (data.client === undefined){
-      jsonError.message = "El cliente no existe.";
-      return res.status(400).json(jsonError);
-	}
-	var query = {};
-	if (req.query.type !== undefined && req.query.type === 'DETAIL'){
-	  query.number = Number(data.number);
-    }else {
-	  query.client = Number(data.client);
+  if (req.params.id === 'getCard'){
+    var number = Math.round(new Date().getTime());
+    var ran;
+    do {
+      ran = Math.floor(Math.random() * 999);
+    } while (ran < 100);
+    var data = {
+      account: number,
+      card: '41' + number + '' + ran
+    };
+    
+    return res.json(data);
+  }else{
+    var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
+    if (req.query.type !== undefined && req.query.type === 'DETAIL'){
+      pathUrlCli = pathUrlAccount;
     }
-	var params2 ="&q=" + JSON.stringify(query);
-    service.executeGET(pathUrlAccount, apiKey + params2, function(data2) {
-      return res.json(data2);
+    var params = req.params.id + apiKey;
+    service.executeGET(pathUrlCli, params, function(data) {
+      if (data.client === undefined){
+        jsonError.message = "El cliente no existe.";
+        return res.status(400).json(jsonError);
+    }
+    var query = {};
+    if (req.query.type !== undefined && req.query.type === 'DETAIL'){
+      query.number = data.number;
+      }else {
+      query.client = data.client;
+      }
+    var params2 ="&q=" + JSON.stringify(query);
+      service.executeGET(pathUrlAccount, apiKey + params2, function(data2) {
+        return res.json(data2);
+      });
     });
-  });
+  }
+  
   return false;
 });
+
 
 router.delete("/v0/accounts/:id", function(req, res){
   //validaId
@@ -62,13 +78,13 @@ router.delete("/v0/accounts/:id", function(req, res){
     if (data.client != undefined){
       var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
       var obj = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado la cuenta',
-      moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
+      moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'I');
       //Se guarda el movimiento.
       service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
       //No hace nada, no es necesario devolver algo.
       });
       var query = {
-        number: Number(data.number)
+        number: data.number
       };
       var urlQuery ="&q=" + JSON.stringify(query);
       var pathUrlPoc = "https://api.mlab.com/api/1/databases/proyecto/collections/pockets/";
@@ -99,8 +115,9 @@ router.post("/v0/accounts/:id", function(req, res){
       return res.status(400).json(jsonError);
     }
     req.body.client = data.client;
-    req.body.creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
+    req.body.creationDate = moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss');
     req.body.balance = 1000;
+    req.body.shortname = '';
     service.executePOST(pathUrlAccount, apiKey, req.body, function(data2) {
       var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
       var obj = service.getJsonMovements(data.client, req.body.number, 0, 'Se ha dado de alta la cuenta',
@@ -114,17 +131,18 @@ router.post("/v0/accounts/:id", function(req, res){
   return false;
 });
 
+
 router.put("/v0/accounts/:id", function(req, res){
   //validaId
   var params = req.params.id + apiKey;
   service.executeGET(pathUrlAccount, params, function(data) {
-    req.body.client = Number(data.client);
+    req.body.client = data.client;
     req.body.creationDate = data.creationDate;
     req.body.balance = data.balance;
     service.executePUT(pathUrlAccount, apiKey, req.body, function(data2) {
       var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
       var obj = service.getJsonMovements(data.client, data.number, 0, 'Se actualizaron los datos de la cuenta',
-      moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
+      moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'I');
       service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
         //No hace nada, no es necesario devolver el error.
       });

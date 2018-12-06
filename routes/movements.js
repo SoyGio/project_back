@@ -39,7 +39,7 @@ router.get("/v0/movements/:client", function(req, res){
         return res.status(400).json(jsonError);
       }
       var query = {
-        client: Number(data.client)
+        client: data.client
       };
       var sort = {
         "detail.operationDate": 1

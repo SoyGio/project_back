@@ -2,7 +2,9 @@ var requestjson = require('request-json');
 
 var service = {};
 
-var jsonError = {
+var objErr = {
+	code: 'ERROR',
+	isError: true,
 	message: ''
 };
 
@@ -23,7 +25,9 @@ service.executeGET = function (pathUrl, params, callback){
 	request.headers['Content-Type'] = 'application/json';
 	request.get(params, function(err, req, body) {
 	    if (err){
-	    	console.log("Error: ", err);
+	    	console.log(err);
+	    	objErr.code = err.code;
+	    	callback(objErr);
 	    }else{
 	    	callback(body);
 	    }
@@ -37,7 +41,9 @@ service.executePOST = function (pathUrl, params, post, callback){
 	request.headers['Content-Type'] = 'application/json';
 	request.post(params, post, function(err, req, body) {
 	    if (err){
-	    	console.log("Error: ", err);
+	    	console.log(err);
+	    	objErr.code = err.code;
+	    	callback(objErr);
 	    }else{
 	    	callback(body);
 	    }
@@ -45,12 +51,14 @@ service.executePOST = function (pathUrl, params, post, callback){
   	return false;
 }
 
-service.executePOSTOut = function (pathUrl, params, post){
+service.executePOSTOut = function (pathUrl, params, post, callback){
 	var request = requestjson.createClient(pathUrl);
 	request.headers['Content-Type'] = 'application/json';
 	request.post(params,post, function(err, req, body) {
 	    if (err){
-	    	console.log("Error: ", err);
+	    	console.log(err);
+	    	objErr.code = err.code;
+	    	callback(objErr);
 	    }else{
 	    	return true;
 	    }
@@ -63,7 +71,9 @@ service.executePUT = function (pathUrl, params, post, callback){
 	request.headers['Content-Type'] = 'application/json';
 	request.put(params, post, function(err, req, body) {
 	    if (err){
-	    	console.log("Error: ", err);
+	    	console.log(err);
+	    	objErr.code = err.code;
+	    	callback(objErr);
 	    }else{
 	    	callback(body);
 	    }
@@ -75,7 +85,9 @@ service.executeDELETE = function (pathUrl, params, callback){
 	var request = requestjson.createClient(pathUrl);
 	request.delete(params, function(err, req, body) {
 	    if (err){
-	    	console.log("Error: ", err);
+	    	console.log(err);
+	    	objErr.code = err.code;
+	    	callback(objErr);
 	    }else{
 	    	callback(body);
 	    }

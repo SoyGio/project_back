@@ -24,7 +24,7 @@ router.get('/', function(req, res, next) {
 router.get("/v0/clients", function(req, res){
   if (req.query.client !== undefined && req.query.client !== ''){
 	var query = {
-	  number: Number(req.params.client)
+	  number: req.params.client
 	};
 	var params ="&q=" + JSON.stringify(query);
 	  apiKey +=params;
@@ -37,8 +37,28 @@ router.get("/v0/clients", function(req, res){
 router.get("/v0/clients/:id", function(req, res){
    //validaId
   var params = req.params.id + apiKey;
+  var hour = moment().locale('es-mx').format('H');
+  var currentDate = moment().locale('es-mx').format('YYYY-MM-DD');
   service.executeGET(pathUrlCli, params, function(data) {
-    return res.json(data);
+  	data.currentDate = currentDate;
+  	if (req.query.type === 'welcome'){
+  		var greeting = '';
+	  	if (hour < 12){
+	      greeting = "Buenos días.";
+	  	} else if (hour < 18){
+	  	  greeting = "Buenas tardes.";
+	    } else {
+	      greeting = "Buenas noches.";
+		}
+		var obj = {
+  			name: data.name,
+  			greeting: greeting
+  		}
+	  	return res.json(obj);
+  	}
+  	return res.json(data);
+  	
+    
   });
 
   return false;
@@ -46,8 +66,8 @@ router.get("/v0/clients/:id", function(req, res){
 
 router.post("/v0/clients", function(req, res){
   var json  = {};
-  var clientNumber = Math.floor(Math.random() * 99999999);
-  var creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
+  var clientNumber = Math.round(new Date().getTime());
+  var creationDate = moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss');
   var obj = {
   	name: req.body.name,
   	phoneNumber: req.body.phoneNumber,
@@ -98,11 +118,11 @@ router.put("/v0/clients/:id", function(req, res){
 		    var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 		    var dataX = {
 	  			client: data.client,
-	  			number: 000,
+	  			number: 0,
 	  			detail: {
 	  				amount: 0,
 	  				description: 'Se han actualizado los datos del cliente',
-	  				operationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+	  				operationDate: moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'),
 	  				type: 'I'
 	  			}
 	  		};
@@ -121,13 +141,14 @@ router.delete("/v0/clients/:id", function(req, res){
 	service.executeDELETE(pathUrlCli, params, function(data) {
 	    if (data.number != undefined){
 	    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
+	    	var fecha = moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss');
 		    var data = {
 	  			client: data.client,
-	  			number: 000,
+	  			number: 0,
 	  			detail: {
 	  				amount: 0,
 	  				description: 'Se ha eliminado el cliente',
-	  				operationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+	  				operationDate: fecha,
 	  				type: 'I'
 	  			}
 	  		};

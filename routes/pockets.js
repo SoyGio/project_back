@@ -40,7 +40,7 @@ router.get("/v0/pockets/", function(req, res){
 router.get("/v0/pockets/:number", function(req, res){
 	//validaNumber
 	var query = {
-    	number: Number(req.params.number)
+    	number: req.params.number
   	};
   	var urlQuery ="&q=" + JSON.stringify(query);
   	service.executeGET(pathUrlPoc, apiKey + urlQuery, function(data) {
@@ -60,14 +60,15 @@ router.post("/v0/pockets/:number", function(req, res){
 		balanceAdd = Number(req.body.balance);
 	}
 	var query = {
-    	number: Number(req.params.number)
+    	number: req.params.number
   	};
   	var urlQuery ="&q=" + JSON.stringify(query);
   	var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/accounts/";
   	//Consulta los clientes para validar saldo y la cuenta
+  	console.log(pathUrlCli + apiKey + urlQuery);
   	service.executeGET(pathUrlCli, apiKey + urlQuery, function(data) {
   		if (data.length === 0){
-  			jsonError.message = "El pocket ingresado no corresponde a la cuenta.";
+  			jsonError.message = "El apartado ingresado no corresponde a la cuenta.";
 		    return res.status(400).json(jsonError);
   		}
   		if (data.length > 0 && balanceAdd > data[0].balance){
@@ -75,7 +76,7 @@ router.post("/v0/pockets/:number", function(req, res){
 			return res.status(400).json(jsonError);
     	}
     	var clientId = data[0]._id.$oid;
-    	var creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
+    	var creationDate = moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss');
     	//Consulta pockets para validar si existe el pocket
 		service.executeGET(pathUrlPoc, apiKey + urlQuery, function(data2) {
 			if (data2.length === 0){
@@ -117,7 +118,7 @@ router.post("/v0/pockets/:number", function(req, res){
 			  		return res.json(data);
 				});
 			}else{
-				jsonError.message = "El apartado seleccionado ya existe.";
+				jsonError.message = "El apartado seleccionado ya existe";
 				return res.status(400).json(jsonError);
 			}
 			
@@ -130,7 +131,7 @@ router.post("/v0/pockets/:number", function(req, res){
 router.delete("/v0/pockets/:number", function(req, res){
 	//validaId
 	var query = {
-    	number: Number(req.params.number)
+    	number: req.params.number
   	};
   	var urlQuery ="&q=" + JSON.stringify(query);
   	var pathUrlAcc = "https://api.mlab.com/api/1/databases/proyecto/collections/accounts/";
@@ -152,12 +153,12 @@ router.delete("/v0/pockets/:number", function(req, res){
 				    if (data.number != undefined){
 				    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 				    	var dataX = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado el apartado de la cuenta',
-	  						moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
+	  						moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'I');
 				  		service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
 				  			//No hace nada, no es necesario devolver el error.
 				  		});
 				  		var dataY = service.getJsonMovements(data.client, data.number, dataPoc[0].balance, 'Se ha devuelto el monto del apartado a la cuenta',
-	  						moment().format('YYYY-MM-DD HH:mm:ss'), 'D');
+	  						moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), 'D');
 				  		service.executePOSTOut(pathUrlMov, apiKey, dataY, function(data3) {
 				  			//No hace nada, no es necesario devolver el error.
 				  		});
@@ -182,13 +183,11 @@ router.put("/v0/pockets/:id", function(req, res){
   		}
   		var pathUrlAcc = "https://api.mlab.com/api/1/databases/proyecto/collections/accounts/";
   		var query = {
-  			number: Number(data.number)
+  			number: data.number
   		};
   		var params2 ="&q=" + JSON.stringify(query);
-  		console.log(pathUrlAcc + apiKey + params2);
 	  	service.executeGET(pathUrlAcc, apiKey + params2, function(data2) {
 	  		var accountId = data2[0]._id.$oid;
-	  		console.log(accountId);
 	  		if (type === 'ADD' && Number(req.body.amount) > Number(data2[0].balance)){
 	    		jsonError.message = "El saldo del apartado no puede ser mayor al saldo disponible en tu cuenta.";
 				return res.status(400).json(jsonError);
@@ -224,7 +223,7 @@ router.put("/v0/pockets/:id", function(req, res){
 				}
 				var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 				var dataX = service.getJsonMovements(data.client, data.number, Number(req.body.amount), 'Se ha ' + 
-					desc + ' apartado de la cuenta', moment().format('YYYY-MM-DD HH:mm:ss'), putType);
+					desc + ' apartado de la cuenta', moment().locale('es-mx').format('YYYY-MM-DD HH:mm:ss'), putType);
 				service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
 		  			//No hace nada, no es necesario devolver el error.
 		  		});
