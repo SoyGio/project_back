@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var moment = require('moment');
+var moment = require('moment-timezone');
 var path = require('path');
 var service = require('../scripts/execute.js');
 
@@ -76,12 +76,13 @@ router.get("/v0/accounts/:id", function(req, res){
 router.delete("/v0/accounts/:id", function(req, res){
   //validaId
   var params = req.params.id + apiKey;
+  var date = moment().tz('America/Mexico_City');
   //Se elimina la cuenta
   service.executeDELETE(pathUrlAccount, params, function(data) {
     if (data.client != undefined){
       var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
       var obj = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado la cuenta',
-      moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
+     date.format('YYYY-MM-DD HH:mm:ss'), 'I');
       //Se guarda el movimiento.
       service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
       //No hace nada, no es necesario devolver algo.
@@ -110,6 +111,7 @@ router.delete("/v0/accounts/:id", function(req, res){
 });
 
 router.post("/v0/accounts/:id", function(req, res){
+  var date = moment().tz('America/Mexico_City');
   var params = req.params.id + apiKey;
   var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
   service.executeGET(pathUrlCli, params, function(data) {
@@ -118,7 +120,7 @@ router.post("/v0/accounts/:id", function(req, res){
       return res.status(400).json(jsonError);
     }
     req.body.client = data.client;
-    req.body.creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
+    req.body.creationDate = date.format('YYYY-MM-DD HH:mm:ss');
     req.body.balance = 1000;
     req.body.shortname = '';
     service.executePOST(pathUrlAccount, apiKey, req.body, function(data2) {
@@ -138,6 +140,7 @@ router.post("/v0/accounts/:id", function(req, res){
 router.put("/v0/accounts/:id", function(req, res){
   //validaId
   var params = req.params.id + apiKey;
+  var date = moment().tz('America/Mexico_City');
   service.executeGET(pathUrlAccount, params, function(data) {
     req.body.client = data.client;
     req.body.creationDate = data.creationDate;
@@ -145,7 +148,7 @@ router.put("/v0/accounts/:id", function(req, res){
     service.executePUT(pathUrlAccount, apiKey, req.body, function(data2) {
       var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
       var obj = service.getJsonMovements(data.client, data.number, 0, 'Se actualizaron los datos de la cuenta',
-      moment().format('YYYY-MM-DD HH:mm:ss'), 'I');
+      date.format('YYYY-MM-DD HH:mm:ss'), 'I');
       service.executePOSTOut(pathUrlMov, apiKey, obj, function(data3) {
         //No hace nada, no es necesario devolver el error.
       });

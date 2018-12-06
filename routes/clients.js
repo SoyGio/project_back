@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var moment = require('moment');
+var moment = require('moment-timezone');
 var path = require('path');
 var service = require('../scripts/execute.js');
 var cypher = require('../scripts/cypher.js');
@@ -37,9 +37,10 @@ router.get("/v0/clients", function(req, res){
 
 router.get("/v0/clients/:id", function(req, res){
    //validaId
+   var date = moment().tz('America/Mexico_City');
   var params = req.params.id + apiKey;
-  var hour = moment().format('H');
-  var currentDate = moment().format('YYYY-MM-DD');
+  var hour = date.format('H');
+  var currentDate = date.format('YYYY-MM-DD');
   service.executeGET(pathUrlCli, params, function(data) {
   	data.currentDate = currentDate;
   	if (req.query.type === 'welcome'){
@@ -66,9 +67,10 @@ router.get("/v0/clients/:id", function(req, res){
 });
 
 router.post("/v0/clients", function(req, res){
+	var date = moment().tz('America/Mexico_City');
   var json  = {};
   var clientNumber = Math.round(new Date().getTime());
-  var creationDate = moment().format('YYYY-MM-DD HH:mm:ss');
+  var creationDate = date.format('YYYY-MM-DD HH:mm:ss');
   var obj = {
   	name: req.body.name,
   	phoneNumber: req.body.phoneNumber,
@@ -111,6 +113,7 @@ router.post("/v0/clients", function(req, res){
 
 router.put("/v0/clients/:id", function(req, res){
 	//validaId
+	var date = moment().tz('America/Mexico_City');
 	var params = req.params.id + apiKey;
 	service.executeGET(pathUrlCli, params, function(data) {
 		req.body.client = data.client;
@@ -123,7 +126,7 @@ router.put("/v0/clients/:id", function(req, res){
 	  			detail: {
 	  				amount: 0,
 	  				description: 'Se han actualizado los datos del cliente',
-	  				operationDate: moment().format('YYYY-MM-DD HH:mm:ss'),
+	  				operationDate: date.format('YYYY-MM-DD HH:mm:ss'),
 	  				type: 'I'
 	  			}
 	  		};
@@ -138,11 +141,12 @@ router.put("/v0/clients/:id", function(req, res){
 
 router.delete("/v0/clients/:id", function(req, res){
 	//validaId
+	var date = moment().tz('America/Mexico_City');
 	var params = req.params.id + apiKey;
 	service.executeDELETE(pathUrlCli, params, function(data) {
 	    if (data.number != undefined){
 	    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-	    	var fecha = moment().format('YYYY-MM-DD HH:mm:ss');
+	    	var fecha = date.format('YYYY-MM-DD HH:mm:ss');
 		    var data = {
 	  			client: data.client,
 	  			number: 0,

@@ -3,7 +3,6 @@ var router = express.Router();
 var path = require('path');
 var moment = require('moment-timezone');
 
-
 	router.use(function(req, res, next) {
 		var host = req.get('origin');
   	res.setHeader('Access-Control-Allow-Origin', host || '*');
