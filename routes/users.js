@@ -62,7 +62,6 @@ router.get("/v0/users/", function(req, res){
   }
   var urlQuery ="&q=" + JSON.stringify(query);
   service.executeGET(pathUrlUsers, apiKey + urlQuery, function(data) {
-    console.log(data);
     if (data.isError === undefined){
       var passEnc = cypher.encryptSHA1(req.query.password);
       if (data.length === 0 || passEnc !== data[0].password){

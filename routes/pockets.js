@@ -65,7 +65,6 @@ router.post("/v0/pockets/:number", function(req, res){
   	var urlQuery ="&q=" + JSON.stringify(query);
   	var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/accounts/";
   	//Consulta los clientes para validar saldo y la cuenta
-  	console.log(pathUrlCli + apiKey + urlQuery);
   	service.executeGET(pathUrlCli, apiKey + urlQuery, function(data) {
   		if (data.length === 0){
   			jsonError.message = "El apartado ingresado no corresponde a la cuenta.";
