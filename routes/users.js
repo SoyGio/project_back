@@ -64,6 +64,7 @@ router.get("/v0/users/", function(req, res){
   service.executeGET(pathUrlUsers, apiKey + urlQuery, function(data) {
     if (data.isError === undefined){
       var passEnc = cypher.encryptSHA1(req.query.password);
+      console.log(passEnc);
       if (data.length === 0 || passEnc !== data[0].password){
         json.code = 'ERR';
         json.message = "El usuario y/o contraseña no es válido.";

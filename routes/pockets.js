@@ -82,7 +82,6 @@ router.post("/v0/pockets/:number", function(req, res){
 			if (data2.length === 0){
 		    	var dataX = {
 		    		number: data[0].number,
-	    			client: data[0].client,
 	    			balance: balanceAdd,
 	    			creationDate: creationDate
 	    		};
