@@ -9,7 +9,6 @@ var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clie
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
 
 router.use(function(req, res, next) {
-  moment().locale('es');
   var host = req.get('origin');
   res.setHeader('Access-Control-Allow-Origin', host || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
