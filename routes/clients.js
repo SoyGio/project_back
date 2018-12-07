@@ -117,7 +117,7 @@ router.put("/v0/clients/:id", function(req, res){
 	service.executeGET(pathUrlCli, params, function(data) {
 		req.body.client = data.client;
 	    req.body.creationDate = data.creationDate;
-	    service.executePUT(pathUrlCli, apiKey, req.body, function(data2) {
+	    service.executePUT(pathUrlCli, params, req.body, function(data2) {
 		    var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
 		    var dataX = {
 	  			client: data.client,

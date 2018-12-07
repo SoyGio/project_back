@@ -64,14 +64,13 @@ router.get("/v0/users/", function(req, res){
   service.executeGET(pathUrlUsers, apiKey + urlQuery, function(data) {
     if (data.isError === undefined){
       var passEnc = cypher.encryptSHA1(req.query.password);
-      console.log(passEnc);
       if (data.length === 0 || passEnc !== data[0].password){
         json.code = 'ERR';
         json.message = "El usuario y/o contraseña no es válido.";
         return res.status(400).json(json );
       }
       var query2 = {
-        client: data[0].client
+        client: Number(data[0].client)
       };
       var urlQuery2 ="&q=" + JSON.stringify(query2);
       var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
