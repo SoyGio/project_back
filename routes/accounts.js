@@ -40,7 +40,7 @@ router.get("/v0/accounts/:id", function(req, res){
       ran = Math.floor(Math.random() * 999);
     } while (ran < 100);
     var data = {
-      account: number,
+      account: number.toString(),
       card: '41' + number + '' + ran
     };
     

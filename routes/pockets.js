@@ -94,7 +94,8 @@ router.post("/v0/pockets/:number", function(req, res){
 		    			client: data[0].client,
 		    			cardNumber: data[0].cardNumber,
 		    			balance: newBalanceAccount,
-		    			creationDate: data[0].creationDate
+		    			creationDate: data[0].creationDate,
+		    			shortname: data[0].shortname
 	    			};
 	    			service.executePUT(pathUrlCli, clientId + apiKey, objPut, function(dataPut) {
 	    				
@@ -139,35 +140,42 @@ router.delete("/v0/pockets/:number", function(req, res){
   	service.executeGET(pathUrlAcc, apiKey + urlQuery, function(dataAcc) {
   		var pathUrlPoc = "https://api.mlab.com/api/1/databases/proyecto/collections/pockets/";
 	  	service.executeGET(pathUrlPoc, apiKey + urlQuery, function(dataPoc) {
-	  		var newBalanceAccount = Number(dataAcc[0].balance) + dataPoc[0].balance;
-			var objPut = {
-				number: dataAcc[0].number,
-				client: dataAcc[0].client,
-				cardNumber: dataAcc[0].cardNumber,
-				balance: newBalanceAccount,
-				creationDate: dataAcc[0].creationDate
-			};
-			service.executePUT(pathUrlAcc, apiKey + urlQuery, objPut, function(dataPut) {
-				var params = dataPoc[0]._id.$oid + apiKey;
-				service.executeDELETE(pathUrlPoc, params, function(data) {
-				  	//Consulta los clientes para validar saldo y la cuenta
-				    if (data.number != undefined){
-				    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-				    	var dataX = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado el apartado de la cuenta',
-	  						date.format('YYYY-MM-DD HH:mm:ss'), 'I');
-				  		service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
-				  			//No hace nada, no es necesario devolver el error.
-				  		});
-				  		var dataY = service.getJsonMovements(data.client, data.number, dataPoc[0].balance, 'Se ha devuelto el monto del apartado a la cuenta',
-	  						date.format('YYYY-MM-DD HH:mm:ss'), 'D');
-				  		service.executePOSTOut(pathUrlMov, apiKey, dataY, function(data3) {
-				  			//No hace nada, no es necesario devolver el error.
-				  		});
-						   
-					}
-					res.json(data);
-  				});
-			});
+	  		if (dataPoc.isError === undefined){
+	  			var newBalanceAccount = Number(dataAcc[0].balance) + dataPoc[0].balance;
+				var objPut = {
+					number: dataAcc[0].number,
+					client: dataAcc[0].client,
+					cardNumber: dataAcc[0].cardNumber,
+					balance: newBalanceAccount,
+					creationDate: dataAcc[0].creationDate,
+					shortname: dataAcc[0].shortname
+				};
+				service.executePUT(pathUrlAcc, apiKey + urlQuery, objPut, function(dataPut) {
+					var params = dataPoc[0]._id.$oid + apiKey;
+					service.executeDELETE(pathUrlPoc, params, function(data) {
+					  	//Consulta los clientes para validar saldo y la cuenta
+					    if (data.number != undefined){
+					    	var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
+					    	var dataX = service.getJsonMovements(data.client, data.number, 0, 'Se ha eliminado el apartado de la cuenta',
+		  						date.format('YYYY-MM-DD HH:mm:ss'), 'I');
+					  		service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
+					  			//No hace nada, no es necesario devolver el error.
+					  		});
+					  		var dataY = service.getJsonMovements(data.client, data.number, dataPoc[0].balance, 'Se ha devuelto el monto del apartado a la cuenta',
+		  						date.format('YYYY-MM-DD HH:mm:ss'), 'D');
+					  		service.executePOSTOut(pathUrlMov, apiKey, dataY, function(data3) {
+					  			//No hace nada, no es necesario devolver el error.
+					  		});   
+						}
+						res.json(data);
+	  				});
+				});
+	  		}else{
+	  			json.code = 'ERR_REFUSED';
+		        json.message = "Servicio temporalmente no disponible, intenta mas tarde.";
+		        return res.status(400).json(json);
+	  		}
+	  		
 	  	});
 	 });
 	return false;
