@@ -4,6 +4,7 @@ var moment = require('moment-timezone');
 var path = require('path');
 var service = require('../scripts/execute.js');
 var cypher = require('../scripts/cypher.js');
+const nodemailer = require('../scripts/nodemailer.js');
 
 var pathUrlCli = "https://api.mlab.com/api/1/databases/proyecto/collections/clients/";
 var apiKey = "?apiKey=BC596B42p_doVh2TuyzvxOt8p1Alior6";
@@ -80,8 +81,8 @@ router.post("/v0/clients", function(req, res){
   };
   service.executePOST(pathUrlCli, apiKey, obj, function(data) {
     var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-	var dataX = service.getJsonMovements(clientNumber, 0, 0, 'Se ha creado el cliente', creationDate, 'I');
-  	service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
+		var dataX = service.getJsonMovements(clientNumber, 0, 0, 'Se ha creado el cliente', creationDate, 'I');
+		service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
   	  //No hace nada, no es necesario devolver el error.
   	});
   	var passEnc = cypher.encryptSHA1(req.body.password);
@@ -94,13 +95,22 @@ router.post("/v0/clients", function(req, res){
   	  creationDate: creationDate
     };
   	var pathUrlUser = "https://api.mlab.com/api/1/databases/proyecto/collections/users/";
-	service.executePOST(pathUrlUser, apiKey, obj2, function(data3) {
-		var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
-		var dataX = service.getJsonMovements(clientNumber, 0, 0, 'Se ha creado el usuario', creationDate, 'I');
-	  	service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
-	  	  //No hace nada, no es necesario devolver el error.
-	  	});
-	});
+		service.executePOST(pathUrlUser, apiKey, obj2, function(data3) {
+			let pass = req.body.password;
+			pass = "******" + pass.substring(pass.length-4);
+			const message = "Usuario: " + req.body.username + "<br>Contraseña: " + pass;
+			nodemailer.sendEmail(req.body.email, req.body.name, message, function(send) {
+				var dataM = service.getJsonMovements(clientNumber, 0, 0, 'Se ha enviado correo de confirmación', creationDate, 'I');
+				service.executePOSTOut(pathUrlMov, apiKey, dataM, function(data3) {
+					
+				});
+			});
+			var pathUrlMov = "https://api.mlab.com/api/1/databases/proyecto/collections/movements/";
+			var dataX = service.getJsonMovements(clientNumber, 0, 0, 'Se ha creado el usuario', creationDate, 'I');
+			service.executePOSTOut(pathUrlMov, apiKey, dataX, function(data2) {
+				
+			});
+		});
   	json.code = 'OK';
   	json.message = 'El cliente fue dado de alta correctamente.';
   	json.client = clientNumber;
